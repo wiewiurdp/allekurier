@@ -1,6 +1,9 @@
 doctrine:
     dbal:
         url: '%env(resolve:DATABASE_URL)%'
+        types:
+            amount: 'App\Core\Invoice\Infrastructure\Doctrine\AmountType'
+            email: 'App\Core\User\Infrastructure\Doctrine\EmailType'
         server_version: '5.7'
     orm:
         auto_generate_proxy_classes: true

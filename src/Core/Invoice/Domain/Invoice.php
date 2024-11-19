@@ -7,6 +7,7 @@ use App\Core\Invoice\Domain\Event\InvoiceCanceledEvent;
 use App\Core\Invoice\Domain\Event\InvoiceCreatedEvent;
 use App\Core\Invoice\Domain\Exception\InvoiceException;
 use App\Core\Invoice\Domain\Status\InvoiceStatus;
+use App\Core\Invoice\Domain\ValueObject\Amount;
 use App\Core\User\Domain\User;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -32,23 +33,19 @@ class Invoice
     private User $user;
 
     /**
-     * @ORM\Column(type="integer", options={"unsigned"=true}, nullable=false)
+     * @ORM\Column(type="amount", options={"unsigned"=true}, nullable=false)
      */
-    private int $amount;
+    private Amount $amount;
 
     /**
      * @ORM\Column(type="string", length=16, nullable=false, enumType="\App\Core\Invoice\Domain\Status\InvoiceStatus")
      */
     private InvoiceStatus $status;
 
-    /**
-     * @param User $user
-     * @param int $amount
-     */
-    public function __construct(User $user, int $amount)
+    public function __construct(User $user, Amount $amount)
     {
-        if ($amount <= 0) {
-            throw new InvoiceException('Kwota faktury musi być większa od 0');
+        if (!$user->isActive()){
+            throw new InvoiceException('Faktura może zostać stworzona tylko dla aktywnych użytkowników');
         }
 
         $this->id = null;
@@ -75,7 +72,7 @@ class Invoice
         return $this->user;
     }
 
-    public function getAmount(): int
+    public function getAmount(): Amount
     {
         return $this->amount;
     }

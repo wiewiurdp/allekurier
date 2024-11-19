@@ -2,11 +2,12 @@
 
 namespace App\Core\Invoice\Domain\Event;
 
+use App\Core\User\Domain\ValueObject\Email;
+
 class InvoiceCreatedEvent extends AbstractInvoiceEvent
 {
-    public function getUserEmail(): string
+    public function getUserEmail(): Email
     {
-        // $this->invoice->getUser()->getEmail();
-        return '';
+        return $this->invoice->getUser()->getEmail();
     }
 }

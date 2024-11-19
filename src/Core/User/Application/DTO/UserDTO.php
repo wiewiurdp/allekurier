@@ -1,15 +1,15 @@
 <?php
 
-namespace App\Core\Invoice\Application\DTO;
+declare(strict_types=1);
 
-use App\Core\Invoice\Domain\ValueObject\Amount;
+namespace App\Core\User\Application\DTO;
+
 use App\Core\User\Domain\ValueObject\Email;
 
-class InvoiceDTO
+class UserDTO
 {
     public function __construct(
         public readonly int $id,
         public readonly Email $email,
-        public readonly Amount $amount
     ) {}
 }

@@ -4,9 +4,11 @@ namespace App\Tests\Unit\Core\Invoice\Application\Command\CreateInvoice;
 
 use App\Core\Invoice\Application\Command\CreateInvoice\CreateInvoiceCommand;
 use App\Core\Invoice\Application\Command\CreateInvoice\CreateInvoiceHandler;
-use App\Core\Invoice\Domain\Exception\InvoiceException;
+use App\Core\Invoice\Domain\Exception\InvalidAmountException;
 use App\Core\Invoice\Domain\Invoice;
 use App\Core\Invoice\Domain\Repository\InvoiceRepositoryInterface;
+use App\Core\Invoice\Domain\ValueObject\Amount;
+use App\Core\User\Domain\Exception\InvalidEmailException;
 use App\Core\User\Domain\Exception\UserNotFoundException;
 use App\Core\User\Domain\Repository\UserRepositoryInterface;
 use App\Core\User\Domain\User;
@@ -39,8 +41,13 @@ class CreateInvoiceHandlerTest extends TestCase
     {
         $user = $this->createMock(User::class);
 
+        $user->expects(self::exactly(2))
+            ->method('isActive')
+            ->willReturn(true);
+
         $invoice = new Invoice(
-            $user, 12500
+            $user,
+            new Amount(12500),
         );
 
         $this->userRepository->expects(self::once())
@@ -70,8 +77,15 @@ class CreateInvoiceHandlerTest extends TestCase
 
     public function test_handle_invoice_invalid_amount(): void
     {
-        $this->expectException(InvoiceException::class);
+        $this->expectException(InvalidAmountException::class);
 
         $this->handler->__invoke((new CreateInvoiceCommand('test@test.pl', -5)));
+    }
+
+    public function test_handle_invoice_invalid_email(): void
+    {
+        $this->expectException(InvalidEmailException::class);
+
+        $this->handler->__invoke((new CreateInvoiceCommand('not_email', 12500)));
     }
 }

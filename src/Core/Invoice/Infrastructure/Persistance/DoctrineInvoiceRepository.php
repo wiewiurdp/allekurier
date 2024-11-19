@@ -5,6 +5,7 @@ namespace App\Core\Invoice\Infrastructure\Persistance;
 use App\Core\Invoice\Domain\Invoice;
 use App\Core\Invoice\Domain\Repository\InvoiceRepositoryInterface;
 use App\Core\Invoice\Domain\Status\InvoiceStatus;
+use App\Core\Invoice\Domain\ValueObject\Amount;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\EventDispatcher\EventDispatcherInterface;
 
@@ -15,14 +16,19 @@ class DoctrineInvoiceRepository implements InvoiceRepositoryInterface
         private readonly EventDispatcherInterface $eventDispatcher
     ) {}
 
-    public function getInvoicesWithGreaterAmountAndStatus(int $amount, InvoiceStatus $invoiceStatus): array
+    /**
+     * @return Invoice[]
+     */
+    public function getInvoicesWithGreaterAmountAndStatus(Amount $amount, InvoiceStatus $invoiceStatus): array
     {
         return $this->entityManager
             ->createQueryBuilder()
             ->select('i')
             ->from(Invoice::class, 'i')
             ->where('i.status = :invoice_status')
-            ->setParameter(':invoice_status', InvoiceStatus::NEW)
+            ->andWhere('i.amount = :amount')
+            ->setParameter(':invoice_status', $invoiceStatus->value)
+            ->setParameter(':amount', $amount->getValue())
             ->getQuery()
             ->getResult();
     }
